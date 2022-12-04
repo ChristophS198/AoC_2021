@@ -167,7 +167,7 @@ Polymer::Polymer(const std::string& file_path)
         std::string line = file_input[i];
         if (!line.empty())
         {
-            std::vector<std::string> str_vec = parse_string_to_substring(line, " -> ");
+            std::vector<std::string> str_vec = split_string(line, " -> ");
             if (str_vec.size() != 2)
             {
                 std::string err_str = std::string("Error on input line: ") + std::to_string(i);

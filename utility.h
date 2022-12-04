@@ -206,7 +206,7 @@ std::vector<T> read_numbers_from_file(const std::string& file_path)
  * @param delimiter delimiter used to extract substrings from str
  * @return std::vector<std::string> vector of substrings
  */
-std::vector<std::string> parse_string_to_substring(const std::string& str, const std::string delimiter=" ")
+std::vector<std::string> split_string(const std::string& str, const std::string delimiter=" ")
 {
     std::vector<std::string> substrings;
     size_t start{0};

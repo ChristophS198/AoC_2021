@@ -67,8 +67,8 @@ SignalEntry parse_string_to_SignalEntry(const std::string& line)
     }
     std::string pattern = line.substr( 0, pos );
     std::string output = line.substr(pos+delim.length(), line.length());
-    entry.signal_pattern = parse_string_to_substring(pattern, " ");
-    entry.output_value = parse_string_to_substring(output, " ");
+    entry.signal_pattern = split_string(pattern, " ");
+    entry.output_value = split_string(output, " ");
     if (entry.signal_pattern.size() != 10 || entry.output_value.size() != 4)
     {
         std::string str = std::string("Line \n") + line + std::string("\ndoes not contain expected number of patterns: 'ten patterns | four outupt values'");

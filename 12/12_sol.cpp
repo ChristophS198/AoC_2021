@@ -38,7 +38,7 @@ t_cavern_map read_cavern_map(const std::string& file_path, const std::string& st
     t_cavern_map cavern_map;
     for (const auto& connection : cavern_vec)
     {
-        std::vector<std::string> sub_str = parse_string_to_substring(connection, "-");
+        std::vector<std::string> sub_str = split_string(connection, "-");
         if (sub_str.size() == 0) // might occur on the last (empty) input line
         {
             continue;
