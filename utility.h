@@ -54,6 +54,13 @@ Point3D<T> operator-(const Point3D<T> &p1, const Point3D<T> &p2)
     return Point3D<T>{p1.x-p2.x, p1.y-p2.y, p1.z-p2.z};
 }
 
+template<typename T, typename R>
+Point3D<T> operator+(const Point3D<T> &p1, const R a)
+{
+    T b = static_cast<T>(a);
+    return Point3D<T>{ p1.x+b, p1.y+b, p1.z+b };
+}
+
 template<typename T>
 std::ostream& operator<<(std::ostream &out, const Point3D<T> &p)
 {

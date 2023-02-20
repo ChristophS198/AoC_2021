@@ -20,8 +20,9 @@
 // #include "16/16_sol.cpp"
 // #include "17/17_sol.cpp"
 // #include "19/19_sol.cpp"
-#include "20/20_sol.cpp"
-#include "21/21_sol.cpp"
+// #include "20/20_sol.cpp"
+// #include "21/21_sol.cpp"
+#include "22/22_sol.cpp"
 
 int main(){
     // // Day 1
@@ -125,13 +126,17 @@ int main(){
     // //Day 19 
     // get_number_of_beacons("19/scanner_data.txt");
 
-    // Day 20
-    std::cout << "Num lit pixels after 2 iterations: " << day_20_1("20/input_image.txt") << std::endl;
-    std::cout << "Num lit pixels after 50 iterations: " << day_20_2("20/input_image.txt") << std::endl;
+    // // Day 20
+    // std::cout << "Num lit pixels after 2 iterations: " << day_20_1("20/input_image.txt") << std::endl;
+    // std::cout << "Num lit pixels after 50 iterations: " << day_20_2("20/input_image.txt") << std::endl;
     
-    // Day21
-    std::cout << "Score loosing player x die rolls: " << day_21_1("21/starting_pos.txt") << std::endl;
-    std::cout << "Num universes of max wins: " << day_21_2("21/starting_pos.txt") << std::endl;
+    // // Day21
+    // std::cout << "Score loosing player x die rolls: " << day_21_1("21/starting_pos.txt") << std::endl;
+    // std::cout << "Num universes of max wins: " << day_21_2("21/starting_pos.txt") << std::endl;    
+
+    // Day22
+    std::cout << "22_1: " << day_22_1("22/data.txt") << std::endl;
+    std::cout << "22_2: " << day_22_2("22/data.txt") << std::endl;
 
 
     return 0;
