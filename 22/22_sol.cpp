@@ -15,11 +15,23 @@ enum class InsType{
     OFF,
 };
 
+struct Range
+{
+    pCoord start;
+    pCoord end;
+};
+
+struct Cuboid
+{
+    Range x;
+    Range y;
+    Range z;
+};
+
 struct Instruction
 {
     InsType type;
-    Point3D<pCoord> start;
-    Point3D<pCoord> end;
+    Cuboid cuboid;
 };
 
 void print_instructions(std::ostream &out, const std::vector<Instruction> &ins_vec);
@@ -29,6 +41,10 @@ void limit_point(Instruction &ins, const pCoord lower_lim, const pCoord upper_li
 bool is_in_range(Instruction &ins, const pCoord lower_lim, const pCoord upper_lim);
 void execute_instruction(const Instruction &ins, Grid &grid);
 uint64_t count_active_cubes(const Grid &grid);
+bool do_cuboids_intersect(const Cuboid &c1, const Cuboid &c2);
+std::vector<Range> get_not_intersecting_ranges_r1(const Range r1, const Range r2);
+std::vector<Cuboid> get_not_intersecting_cuboids(const Cuboid &c1, const Cuboid &c2);
+uint64_t count_active_cubes(const std::vector<Cuboid> &c_vec);
 
 std::uint64_t day_22_1(const std::string &file_path)
 {
@@ -44,11 +60,118 @@ std::uint64_t day_22_1(const std::string &file_path)
     return count_active_cubes(grid);
 }
 
-
+/*
+Idea is to iteratively check all "on" instructions from top to bottom. 
+If the current "on"-cube has any grid points (cubes) that have no intersection
+with any following "on" or "off" cube they are counted to the sum of active grid points. 
+If they intersect with a following "on" cuboid they will be counted later on, if they intersect 
+with an "off"-cuboid they will not be counted.
+*/
 std::uint64_t day_22_2(const std::string &file_path)
 {
+    uint64_t sum{ 0u };
+    std::vector<Instruction> ins_vec = get_instructions(file_path);
+    for (size_t i=0; i<ins_vec.size(); ++i)
+    {
+        if (ins_vec[i].type == InsType::OFF) 
+        {
+            continue;
+        }
+        std::vector<Cuboid> not_intersecting_cuboids{ ins_vec[i].cuboid };
+        for (size_t j=i+1; j<ins_vec.size(); ++j)
+        {
+            std::vector<Cuboid> new_not_intersecting_cuboids;
 
-    return 0u;
+            for (const auto &c : not_intersecting_cuboids)
+            {
+                auto tmp = get_not_intersecting_cuboids(c, ins_vec[j].cuboid);
+                new_not_intersecting_cuboids.insert(new_not_intersecting_cuboids.end(), tmp.begin(), tmp.end());
+            }
+            not_intersecting_cuboids = new_not_intersecting_cuboids;
+        }
+        sum += count_active_cubes(not_intersecting_cuboids);
+    }
+    return sum;
+}
+
+/* returns a vector of cuboids of c1 that are not part of c2 
+Up to 6 new cuboids are returned 
+*/
+std::vector<Cuboid> get_not_intersecting_cuboids(const Cuboid &c1, const Cuboid &c2)
+{
+    std::vector<Cuboid> cuboids;
+    if(!do_cuboids_intersect(c1, c2)) 
+    {
+        cuboids.push_back(c1);
+        return cuboids;
+    }
+
+    Range cur_x_range = c1.x;
+    Range cur_y_range = c1.y;
+
+    std::vector<Range> x_range = get_not_intersecting_ranges_r1(c1.x, c2.x);
+    for (const auto &r: x_range)
+    {
+        Cuboid c{ r, c1.y, c1.z };
+        cuboids.push_back(c);
+        // reduce size of x range so we do not include those points twice
+        if (r.start == cur_x_range.start) cur_x_range.start = r.end+1;
+        else cur_x_range.end = r.start-1;
+    }
+    std::vector<Range> y_range = get_not_intersecting_ranges_r1(c1.y, c2.y);
+    for (const auto &r: y_range)
+    {
+        Cuboid c{ cur_x_range, r, c1.z };
+        cuboids.push_back(c);
+        // reduce size of y range so we do not include those points twice
+        if (r.start == cur_y_range.start) cur_y_range.start = r.end+1;
+        else cur_y_range.end = r.start-1;
+    }
+    std::vector<Range> z_range = get_not_intersecting_ranges_r1(c1.z, c2.z);
+    for (const auto &r: z_range)
+    {
+        Cuboid c{ cur_x_range, cur_y_range, r };
+        cuboids.push_back(c);
+    }
+    return cuboids;
+}
+
+// returns a vector of sub-ranges of r1 that are not in range of r2 
+std::vector<Range> get_not_intersecting_ranges_r1(const Range r1, const Range r2)
+{
+    std::vector<Range> ranges;
+    if (r1.start < r2.start)
+    {
+        pCoord start = r1.start;
+        pCoord end = std::min(r1.end, r2.start-1);
+        ranges.push_back({ start, end });
+    }
+    if (r2.end < r1.end)
+    {
+        pCoord start = std::max(r1.start, r2.end+1);
+        pCoord end = r1.end;
+        ranges.push_back({ start, end });
+    }
+    return ranges;
+}
+
+uint64_t count_active_cubes(const std::vector<Cuboid> &c_vec)
+{
+    uint64_t sum{ 0u };
+    for (const auto &c : c_vec)
+    {
+        sum += (c.x.end - c.x.start + 1) * (c.y.end - c.y.start + 1) * (c.z.end - c.z.start + 1);
+    }
+    return sum;
+}
+
+// if any of the ranges do not intersect -> no intersection 
+bool do_cuboids_intersect(const Cuboid &c1, const Cuboid &c2)
+{
+    if (c1.x.end < c2.x.start || c1.x.start > c2.x.end) return false;
+    if (c1.y.end < c2.y.start || c1.y.start > c2.y.end) return false;
+    if (c1.z.end < c2.z.start || c1.z.start > c2.z.end) return false;
+    return true;
 }
 
 void execute_instruction(const Instruction &ins, Grid &grid)
@@ -58,11 +181,11 @@ void execute_instruction(const Instruction &ins, Grid &grid)
     {
         t = 1u;
     }
-    for (auto x=ins.start.x; x<=ins.end.x; ++x)
+    for (auto x=ins.cuboid.x.start; x<=ins.cuboid.x.end; ++x)
     {
-        for (auto y=ins.start.y; y<=ins.end.y; ++y)
+        for (auto y=ins.cuboid.y.start; y<=ins.cuboid.y.end; ++y)
         {
-            for (auto z=ins.start.z; z<=ins.end.z; ++z)
+            for (auto z=ins.cuboid.z.start; z<=ins.cuboid.z.end; ++z)
             {
                 grid[x][y][z] = t;
             }
@@ -77,8 +200,12 @@ std::vector<Instruction> trafo_instructions(const std::vector<Instruction> &ins_
     for (const auto &ins : ins_vec)
     {
         Instruction new_ins{ ins };
-        new_ins.start = new_ins.start + SIZE;
-        new_ins.end = new_ins.end + SIZE;
+        new_ins.cuboid.x.start += SIZE;
+        new_ins.cuboid.x.end += SIZE;
+        new_ins.cuboid.y.start += SIZE;
+        new_ins.cuboid.y.end += SIZE;
+        new_ins.cuboid.z.start += SIZE;
+        new_ins.cuboid.z.end += SIZE;
         if (is_in_range(new_ins, lower_lim, upper_lim))
         {
             limit_point(new_ins, lower_lim, upper_lim);
@@ -90,22 +217,22 @@ std::vector<Instruction> trafo_instructions(const std::vector<Instruction> &ins_
 
 void limit_point(Instruction &ins, const pCoord lower_lim, const pCoord upper_lim)
 {
-    if (ins.start.x < lower_lim) ins.start.x = lower_lim;
-    if (ins.start.y < lower_lim) ins.start.y = lower_lim;
-    if (ins.start.z < lower_lim) ins.start.z = lower_lim;
-    if (ins.start.x > upper_lim) ins.end.x = upper_lim;
-    if (ins.start.y > upper_lim) ins.end.y = upper_lim;
-    if (ins.start.z > upper_lim) ins.end.z = upper_lim;
+    if (ins.cuboid.x.start < lower_lim) ins.cuboid.x.start = lower_lim;
+    if (ins.cuboid.y.start < lower_lim) ins.cuboid.y.start = lower_lim;
+    if (ins.cuboid.z.start < lower_lim) ins.cuboid.z.start = lower_lim;
+    if (ins.cuboid.x.end > upper_lim) ins.cuboid.x.end = upper_lim;
+    if (ins.cuboid.y.end > upper_lim) ins.cuboid.y.end = upper_lim;
+    if (ins.cuboid.z.end > upper_lim) ins.cuboid.z.end = upper_lim;
 }
 
 bool is_in_range(Instruction &ins, const pCoord lower_lim, const pCoord upper_lim)
 {
-    if (ins.end.x < lower_lim) return false;
-    if (ins.end.y < lower_lim) return false;
-    if (ins.end.z < lower_lim) return false;
-    if (ins.start.x > upper_lim) return false;
-    if (ins.start.y > upper_lim) return false;
-    if (ins.start.z > upper_lim) return false;
+    if (ins.cuboid.x.end < lower_lim) return false;
+    if (ins.cuboid.y.end < lower_lim) return false;
+    if (ins.cuboid.z.end < lower_lim) return false;
+    if (ins.cuboid.x.start > upper_lim) return false;
+    if (ins.cuboid.y.start > upper_lim) return false;
+    if (ins.cuboid.z.start > upper_lim) return false;
     return true;
 }
 
@@ -140,7 +267,7 @@ void print_instructions(std::ostream &out, const std::vector<Instruction> &ins_v
         {
             out << "off x=";
         }
-        out << ins.start.x << ".." << ins.end.x << ",y=" << ins.start.y << ".." << ins.end.y << ",z=" << ins.start.z << ".." << ins.end.z << "\n";
+        out << ins.cuboid.x.start << ".." << ins.cuboid.x.end << ",y=" << ins.cuboid.y.start << ".." << ins.cuboid.y.end << ",z=" << ins.cuboid.z.start << ".." << ins.cuboid.z.end << "\n";
     }
 }
 
@@ -159,7 +286,7 @@ std::vector<Instruction> get_instructions(const std::string& file_path)
             {
                 type = InsType::ON;
             }
-            ins_vec.push_back({ type, {num_vec[0], num_vec[2], num_vec[4]},{num_vec[1], num_vec[3], num_vec[5]} });
+            ins_vec.push_back({ type, {{num_vec[0], num_vec[1]}, {num_vec[2],num_vec[3]}, {num_vec[4], num_vec[5]} }});
         }
         input_file.close();   //close the file object.
     }
