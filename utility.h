@@ -263,6 +263,24 @@ std::vector<std::vector<T>> read_2d_vec_from_file(const std::string& file_path)
     return number_vec_2d;
 }
 
+template<>
+std::vector<std::vector<char>> read_2d_vec_from_file(const std::string& file_path)
+{
+    std::vector<std::vector<char>> char_vec_2d{};
+    std::fstream input_file;
+    input_file.open(file_path,std::ios::in);
+    if (input_file.is_open())
+    {
+        std::string input_line;
+        while(getline(input_file, input_line))
+        {  
+            char_vec_2d.push_back(std::vector<char>(input_line.begin(), input_line.end()));
+        }
+        input_file.close();   //close the file object.
+    }
+    return char_vec_2d;
+}
+
 /**
  * @brief Reads in a file and copies content line by line to a vector of strings
  * 

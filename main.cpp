@@ -23,7 +23,8 @@
 // #include "20/20_sol.cpp"
 // #include "21/21_sol.cpp"
 // #include "22/22_sol.cpp"
-#include "24/24_sol.cpp"
+//#include "24/24_sol.cpp"
+#include "25/25_sol.cpp"
 
 int main(){
     // // Day 1
@@ -141,11 +142,13 @@ int main(){
 
     // Day23 was done on paper
 
-    // Day24
-    auto res = day_24_1_2("24/data.txt");
-    std::cout << "24_1: " << res.second << std::endl;
-    std::cout << "24_2: " << res.first << std::endl;
+    // // Day24
+    // auto res = day_24_1_2("24/data.txt");
+    // std::cout << "24_1: " << res.second << std::endl;
+    // std::cout << "24_2: " << res.first << std::endl;
 
+    // Day25
+    std::cout << "25_1: " << day_25_1("25/data.txt") << std::endl;
 
     return 0;
 }
