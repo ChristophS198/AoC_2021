@@ -22,7 +22,8 @@
 // #include "19/19_sol.cpp"
 // #include "20/20_sol.cpp"
 // #include "21/21_sol.cpp"
-#include "22/22_sol.cpp"
+// #include "22/22_sol.cpp"
+#include "24/24_sol.cpp"
 
 int main(){
     // // Day 1
@@ -134,9 +135,16 @@ int main(){
     // std::cout << "Score loosing player x die rolls: " << day_21_1("21/starting_pos.txt") << std::endl;
     // std::cout << "Num universes of max wins: " << day_21_2("21/starting_pos.txt") << std::endl;    
 
-    // Day22
-    std::cout << "22_1: " << day_22_1("22/data.txt") << std::endl;
-    std::cout << "22_2: " << day_22_2("22/data.txt") << std::endl;
+    // // Day22
+    // std::cout << "22_1: " << day_22_1("22/data.txt") << std::endl;
+    // std::cout << "22_2: " << day_22_2("22/data.txt") << std::endl;
+
+    // Day23 was done on paper
+
+    // Day24
+    auto res = day_24_1_2("24/data.txt");
+    std::cout << "24_1: " << res.second << std::endl;
+    std::cout << "24_2: " << res.first << std::endl;
 
 
     return 0;
